@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="icon.png" type="image/png">
+  <title>Tap Tally</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #222;
+      color: #fff;
+      text-align: center;
+    }
+    #gameArea {
+      position: relative;
+      width: 100vw;
+      height: 80vh;
+      background: #111;
+      overflow: hidden;
+    }
+    .circle {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    .green { background: green; }
+    .red { background: red; }
+    #scoreBoard {
+      font-size: 24px;
+      margin: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 18px;
+      margin: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Tap Tally</h1>
+  <div id="scoreBoard">
+    Score: <span id="score">0</span> | Time Left: <span id="timer">60</span>s
+  </div>
+  <div id="gameArea"></div>
+
+  <div>
+    <button onclick="startGame()">Play Again</button>
+    <button onclick="showHowTo()">How to Play</button>
+  </div>
+
+  <script>
+    let score = 0;
+    let timeLeft = 60;
+    let gameInterval, timerInterval;
+    const gameArea = document.getElementById('gameArea');
+
+    function randomPos() {
+      const x = Math.random() * (window.innerWidth - 80);
+      const y = Math.random() * (window.innerHeight * 0.8 - 80);
+      return { x, y };
+    }
+
+    function spawnCircle() {
+      const circle = document.createElement('div');
+      const isGreen = Math.random() < 0.7;
+      circle.className = 'circle ' + (isGreen ? 'green' : 'red');
+      const { x, y } = randomPos();
+      circle.style.left = x + 'px';
+      circle.style.top = y + 'px';
+      circle.onclick = () => handleClick(isGreen, circle);
+      gameArea.appendChild(circle);
+      setTimeout(() => {
+        if (circle.parentElement) circle.remove();
+      }, 2000);
+    }
+
+    function handleClick(isGreen, el) {
+      if (!isGreen) {
+        endGame("Oops! You tapped red.");
+        return;
+      }
+      score++;
+      document.getElementById('score').textContent = score;
+      el.remove();
+    }
+
+    function startGame() {
+      clearInterval(gameInterval);
+      clearInterval(timerInterval);
+      gameArea.innerHTML = '';
+      score = 0;
+      timeLeft = 60;
+      document.getElementById('score').textContent = score;
+      document.getElementById('timer').textContent = timeLeft;
+      gameInterval = setInterval(spawnCircle, 600);
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        document.getElementById('timer').textContent = timeLeft;
+        if (timeLeft <= 0) endGame("Time's up!");
+      }, 1000);
+    }
+
+    function endGame(message) {
+      clearInterval(gameInterval);
+      clearInterval(timerInterval);
+      alert(message + " Your final score: " + score);
+      gameArea.innerHTML = '';
+    }
+
+    function showHowTo() {
+      alert("Tap only the green circles! Avoid red ones.\nYou have 60 seconds. Each correct tap = +1 point.\nGood luck!");
+    }
+
+    startGame();
+  </script>
+</body>
+</html>
